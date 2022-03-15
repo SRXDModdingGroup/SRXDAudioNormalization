@@ -72,14 +72,14 @@ public static class AudioNormalization {
         lock (peaksForTrackData)
             peaksForTrackData.Add(hash, -1f);
 
-        Task.Run(() => CalculatePeak(hash, clip.Data, clip.Samples, clip.Channels, clip.Frequency));
+        Task.Run(() => CalculatePeak(hash, clip.Data, clip.Channels, clip.Frequency));
 
         return 1f;
     }
 
-    private static void CalculatePeak(string hash, float[] data, int samples, int channels, int frequency) {
+    private static void CalculatePeak(string hash, float[] data, int channels, int frequency) {
         int peakWidth = frequency / 4;
-        float[] dataSquared = new float[peakWidth];
+        float[] buffer = new float[peakWidth];
         double runningSum = 0d;
         double peak = 0d;
 
@@ -96,8 +96,8 @@ public static class AudioNormalization {
 
             int index = j % peakWidth;
 
-            runningSum += max - dataSquared[index];
-            dataSquared[index] = max;
+            runningSum += max - buffer[index];
+            buffer[index] = max;
 
             if (runningSum > peak)
                 peak = runningSum;
