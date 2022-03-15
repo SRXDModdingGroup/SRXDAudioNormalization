@@ -60,10 +60,10 @@ public static class AudioNormalization {
     }
 
     private static void CalculatePeak(string hash, float[] data, int samples, int channels, int frequency) {
-        float[] dataSquared = new float[samples];
+        int peakWidth = frequency / 4;
+        float[] dataSquared = new float[peakWidth];
         double runningSum = 0d;
         double peak = 0d;
-        int peakWidth = frequency / 4;
 
         for (int i = 0, j = 0; i < data.Length; i += channels, j++) {
             float max = 0f;
@@ -76,11 +76,10 @@ public static class AudioNormalization {
                     max = square;
             }
 
-            dataSquared[j] = max;
-            runningSum += max;
+            int index = j % peakWidth;
 
-            if (j >= peakWidth)
-                runningSum -= dataSquared[j - peakWidth];
+            runningSum += max - dataSquared[index];
+            dataSquared[index] = max;
 
             if (runningSum > peak)
                 peak = runningSum;
