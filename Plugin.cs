@@ -24,6 +24,7 @@ public class Plugin : SpinPlugin {
         Logger = base.Logger;
         PreferredLoudness = AddBindableConfig("PreferredLoudness", -4.0f);
         MaxGain = AddBindableConfig("MaxGain", 3.5f);
+        AudioNormalization.Init();
 
         var harmony = new Harmony("AudioNormalization");
         

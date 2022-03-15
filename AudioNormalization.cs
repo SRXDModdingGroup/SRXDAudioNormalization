@@ -7,9 +7,27 @@ using Utility;
 namespace SRXDAudioNormalization; 
 
 public static class AudioNormalization {
+    private static readonly float DEFAULT_INTERNAL_VOLUME = 0.298f;
+
+    private static float preferredLoudnessLinear;
+    private static float maxGainLinear;
     private static Dictionary<string, float> peaksForTrackData = new();
 
-    public static float GetVolumeMultiplierForTrackData(PlayableTrackData trackData) {
+    public static void Init() {
+        Plugin.PreferredLoudness.BindAndInvoke(value => preferredLoudnessLinear = AudioUtils.DecibelToLinear(value));
+        Plugin.MaxGain.BindAndInvoke(value => maxGainLinear = AudioUtils.DecibelToLinear(value));
+    }
+
+    public static void UpdateGain(PlayableTrackData trackData) {
+        float volume = DEFAULT_INTERNAL_VOLUME;
+
+        if (trackData != null)
+            volume *= GetVolumeMultiplierForTrackData(trackData);
+
+        SoundEffectAssets.Instance.MixerSettings.mainMixer.SetFloat("MusicVolumeInternal", AudioUtils.LinearToDecibel(volume));
+    }
+
+    private static float GetVolumeMultiplierForTrackData(PlayableTrackData trackData) {
         string hash = trackData.TrackInfoRef.UniqueName;
 
         lock (peaksForTrackData) {
@@ -17,7 +35,7 @@ public static class AudioNormalization {
                 if (peak < 0f)
                     return 1f;
                 
-                return Mathf.Min(AudioUtils.DecibelToLinear(Plugin.PreferredLoudness.Value) / peak, AudioUtils.DecibelToLinear(Plugin.MaxGain.Value));
+                return Mathf.Min(preferredLoudnessLinear / peak, maxGainLinear);
             }
         }
         
