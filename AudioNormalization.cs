@@ -18,11 +18,15 @@ public static class AudioNormalization {
         Plugin.MaxGain.BindAndInvoke(value => maxGainLinear = AudioUtils.DecibelToLinear(value));
     }
 
-    public static void UpdateGain(PlayableTrackData trackData) {
+    public static void UpdateGain(Track track) {
         float volume = DEFAULT_INTERNAL_VOLUME;
 
-        if (trackData != null)
-            volume *= GetVolumeMultiplierForTrackData(trackData);
+        if (!track.IsInEditMode) {
+            var trackData = track.playStateFirst?.trackData;
+
+            if (trackData != null)
+                volume *= GetVolumeMultiplierForTrackData(trackData);
+        }
 
         SoundEffectAssets.Instance.MixerSettings.mainMixer.SetFloat("MusicVolumeInternal", AudioUtils.LinearToDecibel(volume));
     }
@@ -78,7 +82,7 @@ public static class AudioNormalization {
     }
 
     private static void CalculatePeak(string hash, float[] data, int channels, int frequency) {
-        int peakWidth = frequency / 4;
+        int peakWidth = 2 * frequency;
         float[] buffer = new float[peakWidth];
         double runningSum = 0d;
         double peak = 0d;
