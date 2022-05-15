@@ -35,6 +35,6 @@ public class Plugin : SpinPlugin {
         var root = CreateOptionsTab("Audio Normalization").UIRoot;
 
         SpinUI.CreateSlider("Preferred Loudness", root, -10f, 0f, valueDisplay: value => $"{value:F}db").Bind(PreferredLoudness);
-        SpinUI.CreateSlider("Maximum Gain", root, 0f, 5f, valueDisplay: value => $"{value:F}db").Bind(MaxGain);
+        SpinUI.CreateSlider("Maximum Gain", root, 0f, 10f, valueDisplay: value => $"{value:F}db").Bind(MaxGain);
     }
 }
